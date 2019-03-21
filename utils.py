@@ -64,7 +64,7 @@ def test(model, test_loader, criterion):
         target = targets.cuda()
         loss = criterion(pred_mask, target)
         loss_value = loss.item()
-        print(loss_value)
+        print('reach here', loss_value)
         test_loss += loss_value
 
     test_loss /= len(test_loader)  # n_batches

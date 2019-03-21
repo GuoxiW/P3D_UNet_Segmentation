@@ -24,7 +24,7 @@ def pil_loader(path):
 
 def mask_pil_loader(path):
     if not os.path.exists(path):
-        path = '/data1/guoxi/p3d/dataset/pure_mask.png'
+        path = '/data1/guoxi/p3d/dataset/pure_mask_224.png'
     img = Image.open(path)
     return img
 # path = '/disk2/guoxi/p3d/dataset/pure_mask.png'
@@ -224,22 +224,26 @@ class UCF101(data.Dataset):
 
     def __init__(self,
                  root_path,
+                 reference_path,
                  split,
                  spatial_transform=None,
                  target_transform=None,
-                 joint_transform=None,
-                 clip_transform=None,
+                 RandomCrop_transform=None,
+                 RandomHorizontalFlip_transform=None,
+                 RandomErase_transform=None,
                  sample_duration=16):
         root_path = root_path + split + '/'
         # print('root_path', root_path)
         self.data = make_dataset(root_path)
+        self.reference_path = reference_path
         self.split = split
         self.sample_duration = sample_duration
 
         self.spatial_transform = spatial_transform
         self.target_transform = target_transform
-        self.joint_transform = joint_transform
-        self.clip_transform = clip_transform
+        self.RandomCrop_transform = RandomCrop_transform
+        self.RandomHorizontalFlip_transform = RandomHorizontalFlip_transform
+        self.RandomErase_transform = RandomErase_transform
         self.loader = get_default_video_loader()
         self.loader_mask = get_default_mask_video_loader()
 
@@ -252,12 +256,25 @@ class UCF101(data.Dataset):
         """
         path = self.data[index]['video']
         path_mask = path.replace(self.split, self.split + 'annot')
+
         vid_len = self.data[index]['n_frames']
         sample_duration = self.sample_duration
 
         start_point = random.randint(0, vid_len - sample_duration)
 
-        reference_file_path = path_mask + '/' + 'reference.txt'
+        print(self.data[index]['video'])
+        print(self.data[index]['n_frames'])
+        print(self.data[index]['video_id'])
+        print(self.data[index]['frame_set'])
+        print(self.split)
+        print(path)
+        print(path_mask)
+        img_reference_path = self.reference_path + self.split + '/' + self.data[index]['video_id']
+        mask_reference_path = img_reference_path.replace(self.split, self.split + 'annot')
+        print(img_reference_path)
+        print(mask_reference_path)
+
+        reference_file_path = mask_reference_path + '/' + 'reference.txt'
 
         reference_file = open(reference_file_path, "r", encoding='UTF-8')
         reference_list = reference_file.read()
@@ -278,25 +295,65 @@ class UCF101(data.Dataset):
 
         clip = self.loader(path, sel_names)
 
-        reference_clip = self.loader(path, reference_sel_names)
+        reference_clip = self.loader(img_reference_path, reference_sel_names)
 
         groundtruth = self.loader_mask(path_mask, sel_names)
 
-        reference_mask = self.loader_mask(path_mask, reference_sel_names)
+        reference_mask = self.loader_mask(mask_reference_path, reference_sel_names)
 
-        if self.joint_transform is not None:
-            clip = self.joint_transform(clip)
-            reference_clip = self.joint_transform(reference_clip)
-            groundtruth = self.joint_transform(groundtruth)
-            reference_mask = self.joint_transform(reference_mask)
-            # clip = [self.joint_transform(img) for img in clip]
-            # reference_clip = [self.joint_transform(img) for img in reference_clip]
-            # groundtruth = [self.joint_transform(img) for img in groundtruth]
-            # reference_mask = [self.joint_transform(img) for img in reference_mask]
+        # 测试图片是否正确读取
+        # print(path)
+        # # print(path_mask)
+        # test_video_name = path[-10:]
+        # # print(test_video_name)
+        # test_video_path = '/data1/guoxi/p3d_floder/test_for_dataloader/test_for_image/' + test_video_name + '/'
+        # os.mkdir(test_video_path)
+        # # print(reference_clip[0])
+        # reference_clip[0].save(test_video_path + 'reference_clip' + '_' + reference_sel_names[0] + '.jpg')
+        # reference_mask[0].save(test_video_path + 'reference_mask' + '_' + reference_sel_names[0] + '.png')
+        # for test_i in range(16):
+        #     # print(test_i)
+        #     clip[test_i].save(test_video_path + 'clip' + '_' + sel_names[test_i] + '.jpg')
+        #     groundtruth[test_i].save(test_video_path + 'groundtruth' + '_' + sel_names[test_i] + '.png')
 
-        if self.clip_transform is not None:
-            clip = [self.clip_transform(img) for img in clip]
+        # end测试图片是否正确读取
 
+        # useless
+        # if self.joint_transform is not None:
+        #     clip = self.joint_transform(clip)
+        #     reference_clip = self.joint_transform(reference_clip)
+        #     groundtruth = self.joint_transform(groundtruth)
+        #     reference_mask = self.joint_transform(reference_mask)
+        #     # clip = [self.joint_transform(img) for img in clip]
+        #     # reference_clip = [self.joint_transform(img) for img in reference_clip]
+        #     # groundtruth = [self.joint_transform(img) for img in groundtruth]
+        #     # reference_mask = [self.joint_transform(img) for img in reference_mask]
+        #
+        # if self.clip_transform is not None:
+        #     clip = [self.clip_transform(img) for img in clip]
+
+        if self.RandomCrop_transform is not None:
+            [clip, groundtruth] = self.RandomCrop_transform([clip, groundtruth])
+
+        if self.RandomHorizontalFlip_transform is not None:
+            [clip, groundtruth, reference_clip, reference_mask] = self.RandomHorizontalFlip_transform([clip, groundtruth, reference_clip, reference_mask])
+
+        if self.RandomErase_transform is not None:
+            clip = [self.RandomErase_transform(img) for img in clip]
+
+
+
+
+        # 测试transform是否正确
+
+        # reference_clip[0].save(test_video_path + 'reference_clip_after_transform' + '_' + reference_sel_names[0] + '.jpg')
+        # reference_mask[0].save(test_video_path + 'reference_mask_after_transform' + '_' + reference_sel_names[0] + '.png')
+        # for test_i in range(16):
+        #     # print(test_i)
+        #     clip[test_i].save(test_video_path + 'clip_after_transform' + '_' + sel_names[test_i] + '.jpg')
+        #     groundtruth[test_i].save(test_video_path + 'groundtruth_after_transform' + '_' + sel_names[test_i] + '.png')
+
+        # end测试transform是否正确
 
         if self.spatial_transform is not None:
             self.spatial_transform.randomize_parameters()
@@ -314,7 +371,6 @@ class UCF101(data.Dataset):
         reference_mask = torch.stack(reference_mask, 0).permute(1, 0, 2, 3)
         reference_mask = reference_mask.expand([-1, 16, -1, -1])
         groundtruth = torch.stack(groundtruth, 0).permute(1, 0, 2, 3)
-
 
         clip_new = torch.cat((reference_clip, reference_mask, clip), 0)
 
@@ -407,29 +463,33 @@ class UCF101(data.Dataset):
 #         return len(self.data)
 
 
-def get_training_set(opt, spatial_transform, target_transform, joint_transform, clip_transform):
+def get_training_set(opt, reference_path, spatial_transform, target_transform, RandomCrop_transform, RandomHorizontalFlip_transform, RandomErase_transform):
     video_path, sample_duration = opt
     training_data = UCF101(
         root_path=video_path,
+        reference_path=reference_path,
         split='train',
         spatial_transform=spatial_transform,
         target_transform=target_transform,
-        joint_transform=joint_transform,
-        clip_transform=clip_transform,
+        RandomCrop_transform=RandomCrop_transform,
+        RandomHorizontalFlip_transform=RandomHorizontalFlip_transform,
+        RandomErase_transform=RandomErase_transform,
         sample_duration=sample_duration)
 
     return training_data
 
 
-def get_validation_set(opt, spatial_transform, target_transform, joint_transform=None, clip_transform=None):
+def get_validation_set(opt, reference_path, spatial_transform, target_transform, RandomCrop_transform=None, RandomHorizontalFlip_transform=None, RandomErase_transform=None):
     video_path, sample_duration = opt
     validation_data = UCF101(
         root_path=video_path,
+        reference_path=reference_path,
         split='val',
         spatial_transform=spatial_transform,
         target_transform=target_transform,
-        joint_transform=joint_transform,
-        clip_transform=clip_transform,
+        RandomCrop_transform=RandomCrop_transform,
+        RandomHorizontalFlip_transform=RandomHorizontalFlip_transform,
+        RandomErase_transform=RandomErase_transform,
         sample_duration=sample_duration)
     return validation_data
 
