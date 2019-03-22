@@ -70,34 +70,34 @@ def video_loader(video_dir_path, frame_names, image_loader):
     return video
 
 
-def mask_video_loader(video_dir_path, frame_names, image_loader):
+def mask_video_loader(video_dir_path, frame_names, mask_num, image_loader):
     video = []
-    mask_tol_num = get_total_mask_num(video_dir_path)
-    mask_num = str(random.randint(1, mask_tol_num))
-    # print(mask_num)
+    # mask_tol_num = get_total_mask_num(video_dir_path)
+    # mask_num = str(random.randint(1, mask_tol_num))
+    # # print(mask_num)
     for name in frame_names:
         image_path = video_dir_path + '/' + name + '_' + mask_num + '.png'
         video.append(image_loader(image_path))
     return video
 
 
-def get_total_mask_num(video_dir_path):
-    mask_num = 0
-    image_set = os.listdir(video_dir_path)
-    image_set.sort()
-
-    for image in image_set:
-        if len(image) == 9:
-            continue
-        if len(image) == 13:
-            continue
-        tem = int(image[-5])
-
-        # print(tem)
-        if tem > mask_num:
-            mask_num = tem
-
-    return mask_num
+# def get_total_mask_num(video_dir_path):
+#     mask_num = 0
+#     image_set = os.listdir(video_dir_path)
+#     image_set.sort()
+#
+#     for image in image_set:
+#         if len(image) == 9:
+#             continue
+#         if len(image) == 13:
+#             continue
+#         tem = int(image[-5])
+#
+#         # print(tem)
+#         if tem > mask_num:
+#             mask_num = tem
+#
+#     return mask_num
 
     #     # obtain the begin order for image set
     # img_set = os.listdir(video_dir_path)
@@ -274,6 +274,7 @@ class UCF101(data.Dataset):
         print(img_reference_path)
         print(mask_reference_path)
 
+        # 计算最前一个参考帧
         reference_file_path = mask_reference_path + '/' + 'reference.txt'
 
         reference_file = open(reference_file_path, "r", encoding='UTF-8')
@@ -281,7 +282,17 @@ class UCF101(data.Dataset):
         reference_list = json.loads(reference_list)
 
         reference_begin = reference_list[start_point]
+        # end 计算最前一个参考帧
 
+        # start_point中共有多少个mask
+        refer_num_file_path = mask_reference_path + '/' + 'refer_num.txt'
+
+        refer_num_file = open(refer_num_file_path, "r", encoding='UTF-8')
+        refer_num_list = refer_num_file.read()
+        refer_num_list = json.loads(refer_num_list)
+        mask_tol_num = refer_num_list[start_point]
+        mask_num = str(random.randint(1, mask_tol_num))
+        # end start_point中共有多少个mask
 
         reference_point = random.randint(reference_begin, start_point)
 
@@ -297,9 +308,9 @@ class UCF101(data.Dataset):
 
         reference_clip = self.loader(img_reference_path, reference_sel_names)
 
-        groundtruth = self.loader_mask(path_mask, sel_names)
+        groundtruth = self.loader_mask(path_mask, sel_names, mask_num)
 
-        reference_mask = self.loader_mask(mask_reference_path, reference_sel_names)
+        reference_mask = self.loader_mask(mask_reference_path, reference_sel_names, mask_num)
 
         # 测试图片是否正确读取
         # print(path)
@@ -333,7 +344,7 @@ class UCF101(data.Dataset):
         #     clip = [self.clip_transform(img) for img in clip]
 
         if self.RandomCrop_transform is not None:
-            [clip, groundtruth] = self.RandomCrop_transform([clip, groundtruth])
+            [clip, groundtruth] = self.RandomCrop_transform([clip, groundtruth])  #list +
 
         if self.RandomHorizontalFlip_transform is not None:
             [clip, groundtruth, reference_clip, reference_mask] = self.RandomHorizontalFlip_transform([clip, groundtruth, reference_clip, reference_mask])

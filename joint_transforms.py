@@ -69,6 +69,12 @@ class JointRandomHorizontalFlip(object):  # 水平翻转
     def __call__(self, imgs):
         if random.random() < 0.5:
             return [img.transpose(Image.FLIP_LEFT_RIGHT) for img in imgs]
+
+        # res = list()
+        # for img in imgs:
+        #     temp = img.transpose(Image.FLIP_LEFT_RIGHT)
+        #     res.append(temp)
+
         return imgs
 
 
