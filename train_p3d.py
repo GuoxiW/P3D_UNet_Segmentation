@@ -21,7 +21,7 @@ def main():
     learn_rate = 1e-4
     num_epochs = 600  # 最大迭代次数
     max_patience = 60  # 停止训练的参数
-    result_rp = '/data1/guoxi/p3d_floder/result/model/'
+    result_rp = '../result/model/'
     exp_name = 'P3D_saliency'
 
     batch_size = 3
@@ -34,9 +34,10 @@ def main():
     sample_size = 224
     # Number of validation samples for each activity
     n_val_samples = 3
-    # video_path = '/data1/guoxi/p3d_floder/resized_dataset/dataset/'
+    video_path = '/data1/guoxi/p3d_floder/resized_dataset/dataset/'
     reference_path = '/data1/guoxi/p3d_floder/resized_dataset/reference_dataset/'
-    video_path = '/data1/guoxi/p3d_floder/test_for_dataloader/video_path/'
+    # video_path = '/data1/guoxi/p3d_floder/resized_dataset_for_test/dataset/'
+    # reference_path = '/data1/guoxi/p3d_floder/resized_dataset_for_test/reference_dataset/'
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
