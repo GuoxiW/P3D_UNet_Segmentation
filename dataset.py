@@ -271,8 +271,8 @@ class UCF101(data.Dataset):
         # print(path_mask)
         img_reference_path = self.reference_path + self.split + '/' + self.data[index]['video_id']
         mask_reference_path = img_reference_path.replace(self.split, self.split + 'annot')
-        print(img_reference_path)
-        print(mask_reference_path)
+        # print(img_reference_path)
+        # print(mask_reference_path)
 
         # 计算最前一个参考帧
         reference_file_path = mask_reference_path + '/' + 'reference.txt'
@@ -312,22 +312,22 @@ class UCF101(data.Dataset):
 
         reference_mask = self.loader_mask(mask_reference_path, reference_sel_names, mask_num)
 
-        # 测试图片是否正确读取
-        print(path)
-        # print(path_mask)
-        test_video_name = path[-10:]
-        # print(test_video_name)
-        test_video_path = '/data1/guoxi/p3d_floder/resized_dataset_for_test/test_for_dataloader/test_for_image/' + test_video_name + '/'
-        os.mkdir(test_video_path)
-        # print(reference_clip[0])
-        reference_clip[0].save(test_video_path + 'reference_clip' + '_' + reference_sel_names[0] + '.jpg')
-        reference_mask[0].save(test_video_path + 'reference_mask' + '_' + reference_sel_names[0] + '.png')
-        for test_i in range(16):
-            # print(test_i)
-            clip[test_i].save(test_video_path + 'clip' + '_' + sel_names[test_i] + '.jpg')
-            groundtruth[test_i].save(test_video_path + 'groundtruth' + '_' + sel_names[test_i] + '.png')
-
-        # end测试图片是否正确读取
+        # # 测试图片是否正确读取
+        # print(path)
+        # # print(path_mask)
+        # test_video_name = path[-10:]
+        # # print(test_video_name)
+        # test_video_path = '/data1/guoxi/p3d_floder/resized_dataset_for_test/test_for_dataloader/test_for_image/' + test_video_name + '/'
+        # os.mkdir(test_video_path)
+        # # print(reference_clip[0])
+        # reference_clip[0].save(test_video_path + 'reference_clip' + '_' + reference_sel_names[0] + '.jpg')
+        # reference_mask[0].save(test_video_path + 'reference_mask' + '_' + reference_sel_names[0] + '.png')
+        # for test_i in range(16):
+        #     # print(test_i)
+        #     clip[test_i].save(test_video_path + 'clip' + '_' + sel_names[test_i] + '.jpg')
+        #     groundtruth[test_i].save(test_video_path + 'groundtruth' + '_' + sel_names[test_i] + '.png')
+        #
+        # # end测试图片是否正确读取
 
         # useless
         # if self.joint_transform is not None:
@@ -343,7 +343,7 @@ class UCF101(data.Dataset):
         # if self.clip_transform is not None:
         #     clip = [self.clip_transform(img) for img in clip]
 
-        print(reference_clip)
+        # print(reference_clip)
 
         if self.RandomCrop_transform is not None:
             crop_tem = clip + groundtruth
@@ -386,16 +386,16 @@ class UCF101(data.Dataset):
 
 
 
-        # 测试transform是否正确
-
-        reference_clip[0].save(test_video_path + 'reference_clip_after_transform' + '_' + reference_sel_names[0] + '.jpg')
-        reference_mask[0].save(test_video_path + 'reference_mask_after_transform' + '_' + reference_sel_names[0] + '.png')
-        for test_i in range(16):
-            # print(test_i)
-            clip[test_i].save(test_video_path + 'clip_after_transform' + '_' + sel_names[test_i] + '.jpg')
-            groundtruth[test_i].save(test_video_path + 'groundtruth_after_transform' + '_' + sel_names[test_i] + '.png')
-
-        # end测试transform是否正确
+        # # 测试transform是否正确
+        #
+        # reference_clip[0].save(test_video_path + 'reference_clip_after_transform' + '_' + reference_sel_names[0] + '.jpg')
+        # reference_mask[0].save(test_video_path + 'reference_mask_after_transform' + '_' + reference_sel_names[0] + '.png')
+        # for test_i in range(16):
+        #     # print(test_i)
+        #     clip[test_i].save(test_video_path + 'clip_after_transform' + '_' + sel_names[test_i] + '.jpg')
+        #     groundtruth[test_i].save(test_video_path + 'groundtruth_after_transform' + '_' + sel_names[test_i] + '.png')
+        #
+        # # end测试transform是否正确
 
         if self.spatial_transform is not None:
             self.spatial_transform.randomize_parameters()

@@ -76,83 +76,83 @@ def main():
     print('inputs.size(), inputs.min(), inputs.max()', inputs.size(), inputs.min(), inputs.max())
     print('targets.size(), targets.min(), targets.max():', targets.size(), targets.min(), targets.max())
 
-    # # every time we load weights, which may be slow
-    # model_cla = network_cla.P3D199(pretrained=True, num_classes=400)
-    # cla_dict = model_cla.state_dict()
-    #
-    # model = network_seg.P3D199()
-    # # model.apply(utils.weights_init)
-    # seg_dict = model.state_dict()
-    #
-    # pretrained_dict = {k: v for k, v in cla_dict.items() if k in seg_dict}
-    # seg_dict.update(pretrained_dict)
-    # model.load_state_dict(seg_dict)
-    # model.cuda()
-    #
-    # model = nn.DataParallel(model)
-    #
-    # commen_layers = ['conv1_custom','bn1','relu','maxpool','maxpool_2','layer1','layer2','layer3']
-    # # seperate layers, to set different lr
-    # param_exist = []
-    # param_add = []
-    # for k, (name, module) in enumerate(model.named_children()):
-    #     # existing layers
-    #     if name in commen_layers:
-    #         # print('existing layer: ', name)
-    #         for param in module.parameters():
-    #             param_exist.append(param)
-    #     # adding layers
-    #     else:
-    #         # print('adding layer: ', name)
-    #         for param in module.parameters():
-    #             param_add.append(param)
-    # print('  + Number of params: {}'.format(
-    #     sum([p.data.nelement() for p in model.parameters()])))
-    #
-    # optimizer = optim.Adam([{'params': param_exist, 'lr': learn_rate * 0.1}, {'params': param_add}])
-    # criterion = nn.BCELoss().cuda()
-    #
-    # exp_dir = result_rp + exp_name
-    # ##!!! existing directory will be removed
-    # if os.path.exists(exp_dir):
-    #     shutil.rmtree(exp_dir)
-    #
-    # exp = experiment.Experiment(exp_name, result_rp)
-    # exp.init()
-    #
-    # for epoch in range(num_epochs):
-    #
-    #     since = time.time()
-    #
-    #     ### Train ###
-    #     trn_loss = utils.train(model, train_loader, optimizer, criterion)
-    #     print('Epoch {:d}: Train - Loss: {:.4f}'.format(epoch, trn_loss))
-    #     time_elapsed = time.time() - since
-    #     print('Train Time {:.0f}m {:.0f}s'.format(
-    #         time_elapsed // 60, time_elapsed % 60))
-    #
-    #     ### Test ###
-    #     val_loss = utils.test(model, val_loader, criterion)
-    #     print('Val - Loss: {:.4f}'.format(val_loss))
-    #     time_elapsed = time.time() - since
-    #     print('Total Time {:.0f}m {:.0f}s\n'.format(
-    #         time_elapsed // 60, time_elapsed % 60))
-    #
-    #     ### Save Metrics ###
-    #     exp.save_history('train', trn_loss)
-    #     exp.save_history('val', val_loss)
-    #
-    #     ### Checkpoint ###
-    #     exp.save_weights(model, trn_loss, val_loss)
-    #     exp.save_optimizer(optimizer, val_loss)
-    #
-    #     ## Early Stopping ##
-    #     if (epoch - exp.best_val_loss_epoch) > max_patience:
-    #         print(("Early stopping at epoch %d since no "
-    #                + "better loss found since epoch %.3").format(epoch, exp.best_val_loss))
-    #         break
-    #
-    #     exp.epoch += 1
+    # every time we load weights, which may be slow
+    model_cla = network_cla.P3D199(pretrained=True, num_classes=400)
+    cla_dict = model_cla.state_dict()
+
+    model = network_seg.P3D199()
+    # model.apply(utils.weights_init)
+    seg_dict = model.state_dict()
+
+    pretrained_dict = {k: v for k, v in cla_dict.items() if k in seg_dict}
+    seg_dict.update(pretrained_dict)
+    model.load_state_dict(seg_dict)
+    model.cuda()
+
+    model = nn.DataParallel(model)
+
+    commen_layers = ['conv1_custom','bn1','relu','maxpool','maxpool_2','layer1','layer2','layer3']
+    # seperate layers, to set different lr
+    param_exist = []
+    param_add = []
+    for k, (name, module) in enumerate(model.named_children()):
+        # existing layers
+        if name in commen_layers:
+            # print('existing layer: ', name)
+            for param in module.parameters():
+                param_exist.append(param)
+        # adding layers
+        else:
+            # print('adding layer: ', name)
+            for param in module.parameters():
+                param_add.append(param)
+    print('  + Number of params: {}'.format(
+        sum([p.data.nelement() for p in model.parameters()])))
+
+    optimizer = optim.Adam([{'params': param_exist, 'lr': learn_rate * 0.1}, {'params': param_add}])
+    criterion = nn.BCELoss().cuda()
+
+    exp_dir = result_rp + exp_name
+    ##!!! existing directory will be removed
+    if os.path.exists(exp_dir):
+        shutil.rmtree(exp_dir)
+
+    exp = experiment.Experiment(exp_name, result_rp)
+    exp.init()
+
+    for epoch in range(num_epochs):
+
+        since = time.time()
+
+        ### Train ###
+        trn_loss = utils.train(model, train_loader, optimizer, criterion)
+        print('Epoch {:d}: Train - Loss: {:.4f}'.format(epoch, trn_loss))
+        time_elapsed = time.time() - since
+        print('Train Time {:.0f}m {:.0f}s'.format(
+            time_elapsed // 60, time_elapsed % 60))
+
+        ### Test ###
+        val_loss = utils.test(model, val_loader, criterion)
+        print('Val - Loss: {:.4f}'.format(val_loss))
+        time_elapsed = time.time() - since
+        print('Total Time {:.0f}m {:.0f}s\n'.format(
+            time_elapsed // 60, time_elapsed % 60))
+
+        ### Save Metrics ###
+        exp.save_history('train', trn_loss)
+        exp.save_history('val', val_loss)
+
+        ### Checkpoint ###
+        exp.save_weights(model, trn_loss, val_loss)
+        exp.save_optimizer(optimizer, val_loss)
+
+        ## Early Stopping ##
+        if (epoch - exp.best_val_loss_epoch) > max_patience:
+            print(("Early stopping at epoch %d since no "
+                   + "better loss found since epoch %.3").format(epoch, exp.best_val_loss))
+            break
+
+        exp.epoch += 1
 
 
 if __name__ == '__main__':
