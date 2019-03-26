@@ -1,3 +1,4 @@
+# 生成一个224x224纯黑的背景，当图片中没有mask时由此代替
 import numpy as np
 from PIL import Image
 mask_rp = '/data1/guoxi/YouTube-VOS/train_nomutation/Annotations/0248626d9a/00000.png'

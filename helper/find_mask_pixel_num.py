@@ -1,3 +1,4 @@
+# 设置阈值255,寻找像素数小于255的mask
 import os
 from PIL import Image
 import numpy as np

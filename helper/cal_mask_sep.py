@@ -1,3 +1,4 @@
+# 计算每一个图片中有多少个mask
 import os
 from PIL import Image
 import numpy as np

@@ -15,7 +15,7 @@ P3D_UNet_Segmentation
 
 6.pretreatment/remove_wrong_pixel:通过筛选出的错误像素，删除错误像素
 
-7.pretreatment/make_pure_mask:生成一个纯黑的背景，当图片中没有mask时由此代替
+7.pretreatment/make_pure_mask:生成一个224x224纯黑的背景，当图片中没有mask时由此代替
 
 8.pretreatment/mask_change:用于处理突变帧，有突变帧时改变参考帧选取的第一帧，写入每一个视频中的'reference.txt'文件夹中，dataset中读取
 
@@ -30,3 +30,7 @@ P3D_UNet_Segmentation
 11.helper/test_padding:用于检测pretreatment/pre_padding视频padding的效果。
 
 12.helper/test_wrong_mask:早期的用于检测错误mask的代码。
+
+13.pretreatment/make_resize_data:将数据集resize成dataset和reference_dataset,从而在程序中减少resize_transform这一项。
+
+14.pretreatment/mask_num:将每一个mask帧中有多少个mask记录在'refer_num.txt'中，从而dataloader中实现更快的读取，而若纯黑的mask，则写入1。

@@ -1,3 +1,4 @@
+# 用于读取mask_change函数得出的'reference.txt'
 import os
 from PIL import Image
 import numpy as np

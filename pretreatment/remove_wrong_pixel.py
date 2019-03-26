@@ -1,3 +1,4 @@
+# 通过筛选出的错误像素，删除错误像素
 from PIL import Image
 import numpy as np
 import os

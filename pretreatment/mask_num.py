@@ -1,3 +1,4 @@
+# 将每一个mask帧中有多少个mask记录在'refer_num.txt'中，从而dataloader中实现更快的读取，而若纯黑的mask，则写入1。
 import os
 from PIL import Image
 import numpy as np

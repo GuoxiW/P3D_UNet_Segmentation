@@ -1,3 +1,4 @@
+# 用于处理多个mask的情况，将名称命名为00000_0.png，00000_1.png
 import numpy as np
 from PIL import Image
 import os

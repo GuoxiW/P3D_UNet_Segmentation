@@ -1,3 +1,4 @@
+# 将数据集resize成dataset和reference_dataset,从而在程序中减少resize_transform这一项。
 from PIL import Image
 import os
 import shutil

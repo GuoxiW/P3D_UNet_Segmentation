@@ -1,3 +1,4 @@
+# 设置阈值255，寻找像素数小于255的mask,删除正确的视频，然后在错误的视频中人工判断其是否为错误像素
 import os
 from PIL import Image
 import numpy as np

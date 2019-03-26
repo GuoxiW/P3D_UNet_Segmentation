@@ -1,3 +1,4 @@
+# 早期的用于检测错误mask的代码。
 import os
 from PIL import Image
 import numpy as np

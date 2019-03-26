@@ -12,7 +12,7 @@
 
 6.pretreatment/remove_wrong_pixel:通过筛选出的错误像素，删除错误像素
 
-7.pretreatment/make_pure_mask:生成一个纯黑的背景，当图片中没有mask时由此代替
+7.pretreatment/make_pure_mask:生成一个224x224纯黑的背景，当图片中没有mask时由此代替
 
 8.pretreatment/mask_change:用于处理突变帧，有突变帧时改变参考帧选取的第一帧，写入每一个视频中的'reference.txt'文件夹中，dataset中读取
 

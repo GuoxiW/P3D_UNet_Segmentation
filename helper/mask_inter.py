@@ -1,3 +1,4 @@
+# 用于选择帧突变的视频，采用删除的方法，删除帧未突变的视频，留下帧突变的视频。
 import os
 from PIL import Image
 import numpy as np

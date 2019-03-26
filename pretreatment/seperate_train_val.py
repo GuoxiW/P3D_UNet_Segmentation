@@ -1,3 +1,4 @@
+# 将train中的数据划分为train和val，即从train中删除一部分数据，复制到val中。
 import os
 import random
 import shutil

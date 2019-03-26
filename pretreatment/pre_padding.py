@@ -1,3 +1,4 @@
+# 用于将不够16帧的视频padding到16帧，采取最后一帧的单边padding。
 import os
 import shutil
 

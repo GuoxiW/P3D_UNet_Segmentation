@@ -1,3 +1,4 @@
+# 用于处理突变帧，有突变帧时改变参考帧选取的第一帧，写入每一个视频中的'reference.txt'文件夹中，dataset中读取
 import os
 from PIL import Image
 import numpy as np
