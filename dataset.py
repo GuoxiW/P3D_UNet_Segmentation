@@ -7,9 +7,10 @@ import random
 import json
 
 
-#  读取不同的mask信息，需要更改maskloader函数
-#  mask_loader中选取最大的数
-#  成为共有多少个mask 0到数字range
+# dataloader迁移须知：
+# 1.需要把reference和image两个文件夹分开
+# 2.指定mask_pil_loader（）中没有mask的情况路径,此时通过/pretreatment/mask_num mask默认为1
+# 3.reference参考帧是在突变帧到clip第一帧随机抽取
 
 
 def pil_loader(path):
