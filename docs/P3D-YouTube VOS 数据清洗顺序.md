@@ -1261,3 +1261,5 @@ reference_dataset中存放的数据：224的train,trainannot,val,valannot。
 
 注意，此时若原始数据时纯黑的，即其中没有物体，则为了让学到东西，refer_num.txt中置1，若中间的没有物体帧不影响mask的选取，仅需在dataloader中 mask_pil_loader 中指定一张纯黑mask的path。
 
+8.将val的数据放在一起
+使用/pretreatment/make_val_data，用于将val中所有的image和mask放在一个文件夹里，在evaluation中进行比对。

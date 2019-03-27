@@ -424,86 +424,117 @@ class UCF101(data.Dataset):
         return len(self.data)
 
 
-# class UCF101_test(data.Dataset):
-#     """
-#     Args:
-#         root (string): Root directory path.
-#         spatial_transform (callable, optional): A function/transform that  takes in an PIL image
-#             and returns a transformed version. E.g, ``transforms.RandomCrop``
-#         temporal_transform (callable, optional): A function/transform that  takes in a list of frame indices
-#             and returns a transformed version
-#         target_transform (callable, optional): A function/transform that takes in the
-#             target and transforms it.
-#         loader (callable, optional): A function to load an video given its path and frame indices.
-#      Attributes:
-#         classes (list): List of the class names.
-#         class_to_idx (dict): Dict with items (class_name, class_index).
-#         imgs (list): List of (image path, class_index) tuples
-#     """
-#
-#     def __init__(self,
-#                  root_path,
-#                  split,
-#                  spatial_transform=None,
-#                  target_transform=None,
-#                  sample_duration=16):
-#         root_path = root_path + split + '/'
-#         # print('root_path', root_path)
-#         self.data = make_dataset(root_path)
-#         self.split = split
-#         self.sample_duration = sample_duration
-#
-#         self.spatial_transform = spatial_transform
-#         self.target_transform = target_transform
-#         self.loader = get_default_video_loader()
-#         # self.loader_mask = get_default_video_loader(is_mask=True)
-#
-#     def gen_indexes(self, vid_length, sample_duration):
-#         ind_sets = list()
-#         begin_ind = 0
-#         end_ind = sample_duration
-#         while end_ind < vid_length:
-#             ind_sets.append(list(range(begin_ind, end_ind)))
-#             begin_ind = end_ind
-#             end_ind += sample_duration
-#         ind_sets.append(list(range(vid_length - sample_duration, vid_length)))
-#         return ind_sets
-#
-#     def __getitem__(self, index):
-#         """
-#         Args:
-#             index (int): Index
-#         Returns:
-#             tuple: (image, target) where target is class_index of the target class.
-#         """
-#         path = self.data[index]['video']
-#         name_video = self.data[index]['video_id']
-#         names_frames = self.data[index]['frame_set']
-#
-#         vid_len = self.data[index]['n_frames']
-#         sample_duration = self.sample_duration
-#
-#         ind_sets = self.gen_indexes(vid_len, sample_duration)
-#         clips_set = list()
-#         for frame_indices in ind_sets:
-#             # print('index', frame_indices)
-#             frame_set = self.data[index]['frame_set']
-#             sel_names = [frame_set[i] for i in frame_indices]
-#
-#             clip = self.loader(path, sel_names)
-#
-#             if self.spatial_transform is not None:
-#                 self.spatial_transform.randomize_parameters()
-#                 clip = [self.spatial_transform(img) for img in clip]
-#             clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
-#             # print('type(clip):', type(clip))
-#             clips_set.append(clip)
-#
-#         return clips_set, name_video, names_frames
-#
-#
-#     def __len__(self):
-#         return len(self.data)
+class UCF101_test(data.Dataset):
+    """
+    Args:
+        root (string): Root directory path.
+        spatial_transform (callable, optional): A function/transform that  takes in an PIL image
+            and returns a transformed version. E.g, ``transforms.RandomCrop``
+        temporal_transform (callable, optional): A function/transform that  takes in a list of frame indices
+            and returns a transformed version
+        target_transform (callable, optional): A function/transform that takes in the
+            target and transforms it.
+        loader (callable, optional): A function to load an video given its path and frame indices.
+     Attributes:
+        classes (list): List of the class names.
+        class_to_idx (dict): Dict with items (class_name, class_index).
+        imgs (list): List of (image path, class_index) tuples
+    """
+
+    def __init__(self,
+                 root_path,
+                 split,
+                 spatial_transform=None,
+                 target_transform=None,
+                 sample_duration=16):
+        root_path = root_path + split + '/'
+        # print('root_path', root_path)
+        self.data = make_dataset(root_path)
+        self.split = split
+        self.sample_duration = sample_duration
+
+        self.spatial_transform = spatial_transform
+        self.target_transform = target_transform
+        self.loader = get_default_video_loader()
+        self.loader_mask = get_default_mask_video_loader()
+        # self.loader_mask = get_default_video_loader(is_mask=True)
+
+    def gen_indexes(self, vid_length, sample_duration):
+        ind_sets = list()
+        begin_ind = 0
+        end_ind = sample_duration
+        while end_ind < vid_length:
+            ind_sets.append(list(range(begin_ind, end_ind)))
+            begin_ind = end_ind
+            end_ind += sample_duration
+        ind_sets.append(list(range(vid_length - sample_duration, vid_length)))
+        return ind_sets
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+        Returns:
+            tuple: (image, target) where target is class_index of the target class.
+        """
+        path = self.data[index]['video']
+        path_mask = path.replace(self.split, self.split + 'annot')
+        name_video = self.data[index]['video_id']
+        names_frames = self.data[index]['frame_set']
+
+        vid_len = self.data[index]['n_frames']
+        sample_duration = self.sample_duration
+
+        ind_sets = self.gen_indexes(vid_len, sample_duration)
+        clips_set = list()
+        for frame_indices in ind_sets:
+            # print('index', frame_indices)
+            frame_set = self.data[index]['frame_set']
+            sel_names = [frame_set[i] for i in frame_indices]
+
+            clip = self.loader(path, sel_names)
+
+            reference_order = frame_indices[0]
+            # print(reference_order)
+            reference_name = [frame_set[reference_order]]
+            reference_clip = self.loader(path, reference_name)
+
+            # reference中共有多少个mask
+            refer_num_file_path = path_mask + '/' + 'refer_num.txt'
+
+            refer_num_file = open(refer_num_file_path, "r", encoding='UTF-8')
+            refer_num_list = refer_num_file.read()
+            refer_num_list = json.loads(refer_num_list)
+            mask_tol_num = refer_num_list[reference_order]
+            mask_num = str(random.randint(1, mask_tol_num))
+            # end reference中共有多少个mask
+            reference_mask = self.loader_mask(path_mask, reference_name, mask_num)
+
+            if self.spatial_transform is not None:
+                self.spatial_transform.randomize_parameters()
+                clip = [self.spatial_transform(img) for img in clip]
+                reference_clip = [self.spatial_transform(img) for img in reference_clip]
+
+            if self.target_transform is not None:
+                reference_mask = [self.target_transform(img) for img in reference_mask]
+
+            clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
+            reference_clip = torch.stack(reference_clip, 0).permute(1, 0, 2, 3)
+            reference_clip = reference_clip.expand([-1, 16, -1, -1])
+
+            reference_mask = torch.stack(reference_mask, 0).permute(1, 0, 2, 3)
+            reference_mask = reference_mask.expand([-1, 16, -1, -1])
+
+            clip_new = torch.cat((reference_clip, reference_mask, clip), 0)
+
+
+            clips_set.append(clip_new)
+
+        return clips_set, name_video, names_frames
+
+
+    def __len__(self):
+        return len(self.data)
 
 
 def get_training_set(opt, reference_path, spatial_transform, target_transform, RandomCrop_transform, RandomHorizontalFlip_transform, RandomErase_transform):
