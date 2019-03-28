@@ -33,3 +33,4 @@
 14.pretreatment/mask_num:将每一个mask帧中有多少个mask记录在'refer_num.txt'中，从而dataloader中实现更快的读取，而若纯黑的mask，则写入1。
 
 15.pretreatment/make_val_data:用于将val中所有的image和mask放在一个文件夹里，在evaluation中进行比对。
+

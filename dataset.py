@@ -5,6 +5,7 @@ import os
 import functools
 import random
 import json
+import numpy as np
 
 
 # dataloader迁移须知：
@@ -76,8 +77,10 @@ def mask_video_loader(video_dir_path, frame_names, mask_num, image_loader):
     # mask_tol_num = get_total_mask_num(video_dir_path)
     # mask_num = str(random.randint(1, mask_tol_num))
     # # print(mask_num)
+    # print(frame_names)
     for name in frame_names:
-        image_path = video_dir_path + '/' + name + '_' + mask_num + '.png'
+        image_path = video_dir_path + '/' + name + '_' + str(mask_num) + '.png'
+        # print(image_path)
         video.append(image_loader(image_path))
     return video
 
@@ -494,9 +497,9 @@ class UCF101_test(data.Dataset):
 
             clip = self.loader(path, sel_names)
 
-            reference_order = frame_indices[0]
+            # reference_order = frame_indices[0]
             # print(reference_order)
-            reference_name = [frame_set[reference_order]]
+            reference_name = [frame_set[0]]
             reference_clip = self.loader(path, reference_name)
 
             # reference中共有多少个mask
@@ -505,33 +508,46 @@ class UCF101_test(data.Dataset):
             refer_num_file = open(refer_num_file_path, "r", encoding='UTF-8')
             refer_num_list = refer_num_file.read()
             refer_num_list = json.loads(refer_num_list)
-            mask_tol_num = refer_num_list[reference_order]
-            mask_num = str(random.randint(1, mask_tol_num))
-            # end reference中共有多少个mask
-            reference_mask = self.loader_mask(path_mask, reference_name, mask_num)
+            mask_tol_num = max(refer_num_list)
+            # print(name_video + str(mask_tol_num))
 
             if self.spatial_transform is not None:
                 self.spatial_transform.randomize_parameters()
                 clip = [self.spatial_transform(img) for img in clip]
                 reference_clip = [self.spatial_transform(img) for img in reference_clip]
 
-            if self.target_transform is not None:
-                reference_mask = [self.target_transform(img) for img in reference_mask]
-
             clip = torch.stack(clip, 0).permute(1, 0, 2, 3)
             reference_clip = torch.stack(reference_clip, 0).permute(1, 0, 2, 3)
             reference_clip = reference_clip.expand([-1, 16, -1, -1])
+            clip_total_mask = list()
 
-            reference_mask = torch.stack(reference_mask, 0).permute(1, 0, 2, 3)
-            reference_mask = reference_mask.expand([-1, 16, -1, -1])
+            for i in range(mask_tol_num):
+                # end reference中共有多少个mask
+                tem = i + 1
+                reference_mask = self.loader_mask(path_mask, reference_name, str(tem))
+                # print(reference_mask)
+                # reference_mask[0].save(reference_name, '/data1/guoxi/p3d_floder/result/masks/')
+                if self.target_transform is not None:
+                    reference_mask = [self.target_transform(img) for img in reference_mask]
 
-            clip_new = torch.cat((reference_clip, reference_mask, clip), 0)
+                reference_mask = torch.stack(reference_mask, 0).permute(1, 0, 2, 3)
+                reference_mask = reference_mask.expand([-1, 16, -1, -1])
 
-
-            clips_set.append(clip_new)
-
-        return clips_set, name_video, names_frames
-
+                clip_new = torch.cat((reference_clip, reference_mask, clip), 0)
+                # print('clip_new=')
+                # print(len(clip_new))
+                clip_total_mask.append(clip_new)
+                # print(name_video + str(len(clip_total_mask)))
+            # if mask_tol_num == len(clip_total_mask):
+            #     print('yes')
+            # else:
+            #     print('no')
+            # print('clip_total_mask=')
+            # print(len(clip_total_mask))
+            clips_set.append(clip_total_mask)
+        # print('clips_set=')
+        # print(len(clips_set))
+        return clips_set, name_video, names_frames, mask_tol_num
 
     def __len__(self):
         return len(self.data)
