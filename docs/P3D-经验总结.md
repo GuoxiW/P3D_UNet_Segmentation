@@ -1,0 +1,5 @@
+P3D-经验总结
+
+参考帧选择：选择突变帧作为参考帧，因为evaluation中也要选择第0帧参考帧，因为容易出现75/80之间因为参考帧不同误差过大，且test时仅给出参考帧。
+
+evaluation:evaluation时因为考虑直观程度，故同时给出3个数据：原图，综合了所有mask的groungtruth，综合了所有预测mask的mask。
