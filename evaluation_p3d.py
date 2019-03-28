@@ -17,7 +17,7 @@ import utils
 import experiment
 
 # 因为数据预处理中已进行了相关操作，故取消了resize和padding
-
+# 为了防止出错 n_threads=1
 
 def main():
 
@@ -134,8 +134,10 @@ def main():
     #     img_set = os.listdir(img_rp)
     #     img_set.sort()
     #
+    #     img_orl = [img_name[0:6] for img_name in img_set]
+    #     img_orl =list(set(img_orl))
+    #     for img_name in img_set[0:6]
     #
-    #     for img_name in img_set:
     #         img = Image.open(img_rp + img_name)
     #         img = img.resize((size, size), Image.BILINEAR)
     #         img_save_rp = out_rp + fol_name + '/' + img_name
