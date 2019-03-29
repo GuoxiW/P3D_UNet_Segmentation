@@ -16,13 +16,15 @@ import network_seg
 import utils
 import experiment
 
-# 列出所有图片的所有mask
+# bug in channels
+# 把同一图片预测出的不同mask拼接在一起
 # 因为数据预处理中已进行了相关操作，故取消了resize和padding
 # 为了防止出错 n_threads=1
 
 def main():
 
-    save_path = '../result/mask_all/'
+    save_path = '../result/mask_added/'
+    tem_path = '../result/mask_add_tem_test/'
     batch_size = 1
     n_threads = 1
     # 'Temporal duration of inputs'
@@ -100,14 +102,17 @@ def main():
                 # print(masks.size(), masks.max(), masks.min())
                 for j in range(sample_duration):
                     order = iord * sample_duration + j
-                    mask_name = name_video[0] + '_' + names_frames[order][0] + '_' + str(mask_tol_num + 1) + '_' + str(int(total_mask)) + '.png'
+                    mask_save_path = tem_path + name_video[0] + '/' + names_frames[order][0] + '/'
+                    if not os.path.exists(mask_save_path):
+                        os.makedirs(mask_save_path)
+                    mask_name = str(mask_tol_num + 1) + '.png'
                     # print(mask_name)
-                    mask_path = save_path + mask_name
+                    mask_path = mask_save_path + mask_name
                     mask = masks[j, :, :]
                     # print(mask.size())
-                    # mask.unsqueeze_(dim=0)
+                    mask.unsqueeze_(dim=0)
                     # print(mask.size())
-                    # mask.unsqueeze_(dim=0)
+                    mask.unsqueeze_(dim=0)
                     # print(mask.size())
                     # mask *= 255
                     # print('masks.size(), masks.max(), masks.min():')
@@ -121,28 +126,46 @@ def main():
                 masks = model(clip.cuda())
             masks.squeeze_()
             for j in range(-1, -1-sample_duration, -1):
-                mask_name = name_video[0] + '_' + names_frames[j][0] + '_' + str(mask_tol_num + 1) + '_' + str(int(total_mask)) + '.png'
+                mask_save_path = tem_path + name_video[0] + '/' + names_frames[j][0] + '/'
+                if not os.path.exists(mask_save_path):
+                    os.makedirs(mask_save_path)
+                mask_name = str(mask_tol_num + 1) + '.png'
                 # print(mask_name)
-                mask_path = save_path + mask_name
-                torchvision.utils.save_image(masks[j, :, :], mask_path)
-    # print('Done with evaluation')
-    # print('make data now')
-    # fol_set = os.listdir(save_path)
-    # fol_set.sort()
-    #
-    # for fol_name in fol_set:
-    #     img_rp = save_path + fol_name + '/'
-    #     img_set = os.listdir(img_rp)
-    #     img_set.sort()
-    #
-    #     img_orl = [img_name[0:6] for img_name in img_set]
-    #     img_orl =list(set(img_orl))
-    #     for img_name in img_set[0:6]
-    #
-    #         img = Image.open(img_rp + img_name)
-    #         img = img.resize((size, size), Image.BILINEAR)
-    #         img_save_rp = out_rp + fol_name + '/' + img_name
-    #         img.save(img_save_rp)
+                mask_path = mask_save_path + mask_name
+                mask = masks[j, :, :]
+                # print(mask.size())
+                mask.unsqueeze_(dim=0)
+                # print(mask.size())
+                mask.unsqueeze_(dim=0)
+                torchvision.utils.save_image(mask, mask_path)
+    print('Done with evaluation')
+    print('make data now')
+    fol_set = os.listdir(tem_path)
+    fol_set.sort()
+
+    for fol_name in fol_set:
+        img_rp = tem_path + fol_name + '/'
+        img_set = os.listdir(img_rp)
+        img_set.sort()
+
+        for img_name in img_set:
+            sep_img_rp = img_rp + img_name + '/'
+            sep_img_set = os.listdir(sep_img_rp)
+            sep_img_set.sort()
+            mask_added = np.zeros((224, 224), dtype=np.float64)  # dtype?
+
+            for sep_img_name in sep_img_set:
+                mask_rp = sep_img_rp + sep_img_name
+                mask = Image.open(mask_rp)
+                print(mask.mode)
+                mask_tem = np.asarray(mask, dtype=np.float64)
+                mask_added = mask_added + mask_tem
+            mask_save_path = save_path + fol_name + '_' + img_name + '.png'
+            mask_added_final = Image.fromarray(mask_added, mode='L')
+            mask_added_final.save(mask_save_path)
+
+
+
 
 
 if __name__ == '__main__':
