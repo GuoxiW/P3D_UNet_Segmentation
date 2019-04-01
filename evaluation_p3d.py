@@ -104,6 +104,11 @@ def main():
                     # print(mask_name)
                     mask_path = save_path + mask_name
                     mask = masks[j, :, :]
+                    # print(mask)
+                    mask_numpy = mask.data.cpu().numpy()
+                    # print(mask_numpy)
+                    mask_numpy = mask_numpy * 255
+                    mask_numpy = mask_numpy.astype(np.uint8)
                     # print(mask.size())
                     # mask.unsqueeze_(dim=0)
                     # print(mask.size())
@@ -112,7 +117,13 @@ def main():
                     # mask *= 255
                     # print('masks.size(), masks.max(), masks.min():')
                     # print(mask.size(), mask.max(), mask.min())
-                    torchvision.utils.save_image(mask, mask_path)
+                    # torchvision.utils.save_image(mask, mask_path)
+                    # print(mask)
+                    # print(type(mask))  <class 'torch.Tensor'>
+                    # print(mask.dtype)  torch.float32
+                    # print((mask>1).nonzero())  []
+                    pure_mask = Image.fromarray(mask_numpy, mode='L')
+                    pure_mask.save(mask_path)
         # dispose the last clip
         clip_set = clip_sets[-1]
         for mask_tol_num, clip in enumerate(clip_set):
@@ -124,26 +135,15 @@ def main():
                 mask_name = name_video[0] + '_' + names_frames[j][0] + '_' + str(mask_tol_num + 1) + '_' + str(int(total_mask)) + '.png'
                 # print(mask_name)
                 mask_path = save_path + mask_name
-                torchvision.utils.save_image(masks[j, :, :], mask_path)
-    # print('Done with evaluation')
-    # print('make data now')
-    # fol_set = os.listdir(save_path)
-    # fol_set.sort()
-    #
-    # for fol_name in fol_set:
-    #     img_rp = save_path + fol_name + '/'
-    #     img_set = os.listdir(img_rp)
-    #     img_set.sort()
-    #
-    #     img_orl = [img_name[0:6] for img_name in img_set]
-    #     img_orl =list(set(img_orl))
-    #     for img_name in img_set[0:6]
-    #
-    #         img = Image.open(img_rp + img_name)
-    #         img = img.resize((size, size), Image.BILINEAR)
-    #         img_save_rp = out_rp + fol_name + '/' + img_name
-    #         img.save(img_save_rp)
-
+                # torchvision.utils.save_image(masks[j, :, :], mask_path)
+                mask = masks[j, :, :]
+                # print(mask)
+                mask_numpy = mask.data.cpu().numpy()
+                # print(mask_numpy)
+                mask_numpy = mask_numpy * 255
+                mask_numpy = mask_numpy.astype(np.uint8)
+                pure_mask = Image.fromarray(mask_numpy, mode='L')
+                pure_mask.save(mask_path)
 
 if __name__ == '__main__':
     main()

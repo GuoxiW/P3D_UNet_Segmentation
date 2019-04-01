@@ -24,7 +24,7 @@ import experiment
 def main():
 
     save_path = '../result/mask_added/'
-    tem_path = '../result/mask_add_tem_test/'
+    tem_path = '../result/mask_add_tem/'
     batch_size = 1
     n_threads = 1
     # 'Temporal duration of inputs'
@@ -110,14 +110,34 @@ def main():
                     mask_path = mask_save_path + mask_name
                     mask = masks[j, :, :]
                     # print(mask.size())
-                    mask.unsqueeze_(dim=0)
+                    # mask.unsqueeze_(dim=0)
                     # print(mask.size())
-                    mask.unsqueeze_(dim=0)
+                    # mask.unsqueeze_(dim=0)
                     # print(mask.size())
                     # mask *= 255
                     # print('masks.size(), masks.max(), masks.min():')
                     # print(mask.size(), mask.max(), mask.min())
-                    torchvision.utils.save_image(mask, mask_path)
+                    # torchvision.utils.save_image(mask, mask_path)
+                    # print(mask)
+                    mask_numpy = mask.data.cpu().numpy()
+                    # print(mask_numpy)
+                    mask_numpy = mask_numpy * 255
+                    mask_numpy = mask_numpy.astype(np.uint8)
+                    # print(mask.size())
+                    # mask.unsqueeze_(dim=0)
+                    # print(mask.size())
+                    # mask.unsqueeze_(dim=0)
+                    # print(mask.size())
+                    # mask *= 255
+                    # print('masks.size(), masks.max(), masks.min():')
+                    # print(mask.size(), mask.max(), mask.min())
+                    # torchvision.utils.save_image(mask, mask_path)
+                    # print(mask)
+                    # print(type(mask))  <class 'torch.Tensor'>
+                    # print(mask.dtype)  torch.float32
+                    # print((mask>1).nonzero())  []
+                    pure_mask = Image.fromarray(mask_numpy, mode='L')
+                    pure_mask.save(mask_path)
         # dispose the last clip
         clip_set = clip_sets[-1]
         for mask_tol_num, clip in enumerate(clip_set):
@@ -134,10 +154,30 @@ def main():
                 mask_path = mask_save_path + mask_name
                 mask = masks[j, :, :]
                 # print(mask.size())
-                mask.unsqueeze_(dim=0)
+                # mask.unsqueeze_(dim=0)
                 # print(mask.size())
-                mask.unsqueeze_(dim=0)
-                torchvision.utils.save_image(mask, mask_path)
+                # mask.unsqueeze_(dim=0)
+                # torchvision.utils.save_image(mask, mask_path)
+                # print(mask)
+                mask_numpy = mask.data.cpu().numpy()
+                # print(mask_numpy)
+                mask_numpy = mask_numpy * 255
+                mask_numpy = mask_numpy.astype(np.uint8)
+                # print(mask.size())
+                # mask.unsqueeze_(dim=0)
+                # print(mask.size())
+                # mask.unsqueeze_(dim=0)
+                # print(mask.size())
+                # mask *= 255
+                # print('masks.size(), masks.max(), masks.min():')
+                # print(mask.size(), mask.max(), mask.min())
+                # torchvision.utils.save_image(mask, mask_path)
+                # print(mask)
+                # print(type(mask))  <class 'torch.Tensor'>
+                # print(mask.dtype)  torch.float32
+                # print((mask>1).nonzero())  []
+                pure_mask = Image.fromarray(mask_numpy, mode='L')
+                pure_mask.save(mask_path)
     print('Done with evaluation')
     print('make data now')
     fol_set = os.listdir(tem_path)
@@ -152,14 +192,15 @@ def main():
             sep_img_rp = img_rp + img_name + '/'
             sep_img_set = os.listdir(sep_img_rp)
             sep_img_set.sort()
-            mask_added = np.zeros((224, 224), dtype=np.float64)  # dtype?
+            mask_added = np.zeros((224, 224), dtype=np.float32)  # dtype?
 
             for sep_img_name in sep_img_set:
                 mask_rp = sep_img_rp + sep_img_name
                 mask = Image.open(mask_rp)
-                print(mask.mode)
-                mask_tem = np.asarray(mask, dtype=np.float64)
+                # print(mask.mode)
+                mask_tem = np.asarray(mask, dtype=np.float32)
                 mask_added = mask_added + mask_tem
+            mask_added = mask_added.astype(np.uint8)
             mask_save_path = save_path + fol_name + '_' + img_name + '.png'
             mask_added_final = Image.fromarray(mask_added, mode='L')
             mask_added_final.save(mask_save_path)
