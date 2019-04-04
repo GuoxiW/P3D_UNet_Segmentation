@@ -34,3 +34,21 @@
 
 15.pretreatment/make_val_data:用于将val中所有的image和mask放在一个文件夹里，在evaluation中进行比对。
 
+16.evaluation_for_matlab:生成用于DAVIS matlab计算的数据格式。
+
+```
+/fol_name/mask_name/00000.png
+```
+
+17.for_davis/change_davis_wrong:DAVIS数据集中的tennis项网球本应是背景0，但被标注成了255，用此函数来更改。
+
+18.for_davis/get_fol_name:生成用于DAVIS matlab计算的train.txt,val.txt为空。
+
+```
+/data1/guoxi/p3d/p3d_evaluation/DAVIS/ImageSets/2017/train.txt
+/data1/guoxi/p3d/p3d_evaluation/DAVIS/ImageSets/2017/val.txt
+```
+
+19.for_davis/remove_mask_folder:在使用DAVIS matlab将同一图片不同mask混合时，合成后的文件夹删除/1/，/2/文件夹。
+
+20.remove_sep_mask_and_reference:删除ground truth中的reference.txt,refer_num.txt,00000_1.png等等影响evaluation的文件。
