@@ -1,6 +1,7 @@
 import os
 import shutil
 
+# no use in matlab
 # 在使用DAVIS matlab将同一图片不同mask混合时，合成后的文件夹删除/1/，/2/文件夹。
 
 mask_fol_rp = '/data1/guoxi/p3d/p3d_evaluation/DAVIS/Results/Segmentations/480p/mask_matlab/'
