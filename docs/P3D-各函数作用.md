@@ -36,6 +36,7 @@
 
 16.evaluation_for_matlab:生成用于DAVIS matlab计算的数据格式。
 
+17.pretreatment/make_dataset_for_test_densecrf:生成用于检测densecrf正确性的数据，即把groundtruth当作预测值，检验J与F
 ```
 /fol_name/mask_name/00000.png
 ```
