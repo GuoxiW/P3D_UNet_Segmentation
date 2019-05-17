@@ -1,0 +1,2 @@
+script_train.sh and trainval_net.py are taken from the orignal implementation to help test code.
+I will implement them later.
